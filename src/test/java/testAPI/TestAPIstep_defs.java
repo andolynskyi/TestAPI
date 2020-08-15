@@ -1,27 +1,34 @@
 package testAPI;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
+import io.restassured.response.ResponseBody;
 import org.junit.Assert;
 import org.junit.Test;
+import testAPI.apiModel.ResponseBod;
+
+import java.util.List;
 
 public class TestAPIstep_defs {
 
     @Test
     public void firstTest() {
-        String URI = "https://api.football-data.org/v2";
-        String endPoint = "/teams/12";
+        RestAssured.baseURI = "https://api.football-data.org/";
+        RestAssured.basePath = "/v2";
+        String token = "e051043b86624518a57a263f9388d198";
 
         Response response = RestAssured.given().contentType(ContentType.JSON).when()
-                .headers("X-Auth-Token", "e051043b86624518a57a263f9388d198").get(URI + endPoint);
+                .headers("X-Auth-Token", token).get("/teams/12");
 
-        Assert.assertEquals("Status code doesn't match in positive scenario"
-                ,200,response.statusCode());
+        response.then().log().all().assertThat().statusCode(200);
+
     }
 
     @Test
-    public void secondTest(){
+    public void secondTest() {
         String URI = "https://api.football-data.org/v2";
         String endPoint = "/teams/12";
 
@@ -29,12 +36,22 @@ public class TestAPIstep_defs {
                 .get(URI + endPoint);
 
         Assert.assertEquals("Validate without token doesn't pass"
-                ,403,response.statusCode());
+                , 403, response.statusCode());
     }
 
     @Test
-    public void thirdTest(){
-        RestAssured.baseURI = "https://api.football-data.org/v2";
-        RestAssured.basePath = "/teams/12";
+    public void thirdTest() throws Exception {
+        RestAssured.baseURI = "https://api.football-data.org/";
+        RestAssured.basePath = "v2";
+        String token = "e051043b86624518a57a263f9388d198";
+
+        Response response = RestAssured.given().contentType(ContentType.JSON).when()
+                .headers("X-Auth-Token", token).get("/teams/12");
+
+        JsonPath jp = response.jsonPath();
+        List<Object> list = jp.getList("squad");
+
+        Assert.assertTrue("squad member less than 20", list.size() >= 20);
+
     }
 }
