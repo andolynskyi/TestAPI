@@ -41,12 +41,12 @@ public class TestAPIstep_defs {
 
     @Test
     public void thirdTest() throws Exception {
-        RestAssured.baseURI = "https://api.football-data.org/";
-        RestAssured.basePath = "v2";
+        String URI = "https://api.football-data.org/v2";
+        String endPoint = "/teams/12";
         String token = "e051043b86624518a57a263f9388d198";
 
         Response response = RestAssured.given().contentType(ContentType.JSON).when()
-                .headers("X-Auth-Token", token).get("/teams/12");
+                .headers("X-Auth-Token", token).get(URI + endPoint);
 
         JsonPath jp = response.jsonPath();
         List<Object> list = jp.getList("squad");
